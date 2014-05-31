@@ -17,7 +17,7 @@ Auth class for www.odnoklassniki.ru
 	}
 	authByOk = OkAuth.new(@options)
 	redirect_to authByOk.getAuthUrl
-end<pre></li>
+end</pre></li>
 	<li>Create callback action
 <pre>def loginByOkCallback
 	get = request.GET
@@ -30,6 +30,6 @@ end<pre></li>
 	}
 	authByOk = OkAuth.new(@options)
 	userOkData = authByOk.getUserData(get["code"])
-end<pre></li>
+end</pre></li>
   <li>Save userdata in DB and login him</li>
 </ol>
