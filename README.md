@@ -3,7 +3,7 @@ OkAuth
 
 Auth class for www.odnoklassniki.ru
 
-<h3>How to use<h3>
+<h3>How to use</h3>
 
 <ol>
 	<li>First create aplication on odnoklassniki.ru</li>
