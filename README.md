@@ -10,16 +10,15 @@ Auth class for www.odnoklassniki.ru
 	<li>Create action login by odnoklassniki.ru
 <pre>def loginByOk
 	@options = {
-		'client_id'         => [your_app client_id],
+		'client_id'         => [your_app_client_id],
 		'scope'             => "VALUABLE ACCESS",
 		'redirect_uri'      => [callback_action],
 		'client_secret'     => [your_app_client_secret],
 	}
-	redirect_to OkAuth.new(@options).getAuthUrl
+	redirect_to OkAuth.new(@options).get_auth_url
 end</pre></li>
 	<li>Create callback action
 <pre>def loginByOkCallback
-	get = request.GET
 	@options = {
 		'client_id'         => [your_app_client_id],
 		'scope'             => "VALUABLE ACCESS",
@@ -27,7 +26,7 @@ end</pre></li>
 		'client_secret'     => [your_app_client_secret],
 		'application_key'   => [your_app_client_public],
 	}
-	userOkData = OkAuth.new(@options).getUserData(get["code"])
+	userOkData = OkAuth.new(@options).get_user_data(request.GET["code"])
 end</pre></li>
   <li>Save userdata in DB and login him</li>
 </ol>

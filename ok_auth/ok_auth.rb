@@ -1,18 +1,9 @@
+require 'net/http'
+
 #
 # Class for OAuth 2.0 on http://odnoklassniki.ru/
 #
 class OkAuth
-
-	require 'net/http'
-
-	@options                                                # array aplication options
-	@@auth_url_options = {
-		'auth_host'         => "www.odnoklassniki.ru",      # domain service
-		'auth_page'         => "/oauth/authorize",          # auth page
-		'api_host'          => "api.odnoklassniki.ru",      # domain API service
-		'access_token_path' => "/oauth/token.do",           # page for getting access token
-		'method_url_path'   => "/fb.do"                     # page for request api methods
-	}
 
 
 	#
@@ -23,18 +14,14 @@ class OkAuth
 	# return string
 	#
 	def initialize(auth_options)
-		@options = OkAuth.getUrlOptions
+		@options = {
+			'auth_host'         => "www.odnoklassniki.ru",      # domain service
+			'auth_page'         => "/oauth/authorize",          # auth page
+			'api_host'          => "api.odnoklassniki.ru",      # domain API service
+			'access_token_path' => "/oauth/token.do",           # page for getting access token
+			'method_url_path'   => "/fb.do"                     # page for request api methods
+		}
 		@options = @options.merge(auth_options)
-	end
-
-
-	#
-	# Getting auth params
-	#
-	# return array
-	#
-	def OkAuth.getUrlOptions
-		@@auth_url_options
 	end
 
 
@@ -43,7 +30,7 @@ class OkAuth
 	#
 	# return string
 	#
-	def getAuthUrl
+	def get_auth_url
 		URI::HTTP.build(
 			:host  => @options['auth_host'],
 			:path  => @options['auth_page'],
@@ -64,9 +51,9 @@ class OkAuth
 	#
 	# return string
 	#
-	def getSig(access_token)
-		methodStr = 'application_key=' + @options['application_key'] + 'method=users.getCurrentUser'
-		Digest::MD5.hexdigest(methodStr + Digest::MD5.hexdigest(access_token + @options['client_secret']))
+	def get_sig(access_token)
+		method_str = 'application_key=' + @options['application_key'] + 'method=users.getCurrentUser'
+		Digest::MD5.hexdigest(method_str + Digest::MD5.hexdigest(access_token + @options['client_secret']))
 	end
 
 
@@ -77,8 +64,8 @@ class OkAuth
 	#
 	# return array
 	#
-	def getUserData(code)
-		accessUri = URI::HTTP.build(
+	def get_user_data(code)
+		access_uri = URI::HTTP.build(
 			:host  => @options['api_host'],
 			:path  => @options['access_token_path'],
 			:query => {
@@ -90,25 +77,30 @@ class OkAuth
 			}.to_query
 		)
 
-		accessRequest = JSON.parse Net::HTTP.post_form(accessUri, []).body
+		access_request = JSON.parse Net::HTTP.post_form(access_uri, []).body
 
-		getCurrentUserUri = URI::HTTP.build(
+		current_user_uri = URI::HTTP.build(
 			:host  => @options['api_host'],
 			:path  => @options["method_url_path"],
 			:query => {
-				:access_token    => accessRequest['access_token'],
+				:access_token    => access_request['access_token'],
 				:application_key => @options['application_key'],
 				:method          => "users.getCurrentUser",
-				:sig             => self.getSig(accessRequest['access_token'])
+				:sig             => self.get_sig(access_request['access_token'])
 			}.to_query
 		)
 
-		JSON.parse Net::HTTP.get_response(getCurrentUserUri).body
+		response = JSON.parse Net::HTTP.get_response(current_user_uri).body
+
+		if response.nil?
+			nil
+		else 
+			response
+		end
 	end
 
 
-	public    :getAuthUrl, :getUserData
-	protected :getSig
-
+	public    :get_auth_url, :get_user_data
+	protected :get_sig
 
 end
